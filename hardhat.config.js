@@ -16,8 +16,8 @@ module.exports = {
   },
   networks: {
     litvm: {
-      url: "https://litvm-devnet.rpc.caldera.xyz/",
-      chainId: 840027,
+      url: "https://liteforge.rpc.caldera.xyz/http",
+      chainId: 4441,
       accounts: [LITVM_PRIVATE_KEY],
     },
     sepolia: {

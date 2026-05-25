@@ -1,9 +1,9 @@
 import deployed from "../../deployed-addresses.json";
 
-export const LITVM_CHAIN_ID = 840027;
+export const LITVM_CHAIN_ID = 4441;
 export const SEPOLIA_CHAIN_ID = 11155111;
 
-export const LITVM_RPC = "https://litvm-devnet.rpc.caldera.xyz/";
+export const LITVM_RPC = "https://liteforge.rpc.caldera.xyz/http";
 export const SEPOLIA_RPC = "https://eth-sepolia.g.alchemy.com/v2/demo";
 
 export const ADDRESSES = deployed;
