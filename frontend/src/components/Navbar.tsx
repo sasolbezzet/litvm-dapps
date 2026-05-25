@@ -6,10 +6,10 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
-  { href: "/swap", label: "Swap" },
-  { href: "/liquidity", label: "Liquidity" },
-  { href: "/bridge", label: "Bridge" },
-  { href: "/staking", label: "Staking" },
+  { href: "/swap/", label: "Swap" },
+  { href: "/liquidity/", label: "Liquidity" },
+  { href: "/bridge/", label: "Bridge" },
+  { href: "/staking/", label: "Staking" },
 ];
 
 export default function Navbar() {
