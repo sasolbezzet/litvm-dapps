@@ -1,0 +1,9 @@
+node_modules/
+.env
+artifacts/
+cache/
+typechain-types/
+deployments/
+frontend/.next/
+frontend/out/
+frontend/node_modules/
