@@ -1,15 +1,65 @@
-"use client";import {useState}from"react";import {useAccount,useReadContract,useWriteContract,useWaitForTransactionReceipt}from"wagmi";import {parseUnits,formatUnits}from"viem";import {STAKING_ABI,ADDRESSES}from"@/lib/constants";
-export default function Staking(){const{address,isConnected}=useAccount();const[sv,ss]=useState("");const[wv,sw]=useState("");const{data:earned}=useReadContract({address:ADDRESSES.litvm.staking as `0x${string}`,abi:STAKING_ABI,functionName:"earned",args:address?[address]:undefined,query:{enabled:!!address}});const{data:staked}=useReadContract({address:ADDRESSES.litvm.staking as `0x${string}`,abi:STAKING_ABI,functionName:"stakes",args:address?[address]:undefined,query:{enabled:!!address}});const{wc,data:tx,ip}=useWriteContract();const{il:w}=useWaitForTransactionReceipt({hash:tx});if(!isConnected)return<div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 af"><h2 className="text-xl font-bold text-white">Connect Wallet</h2></div>;
-  const e=earned?formatUnits(earned as bigint,6):"0";const s=staked?formatUnits(staked as bigint,18):"0";
-  return <div className="mt-10 max-w-[460px] mx-auto af"><h1 className="text-2xl font-bold mb-6 text-white">Staking</h1>
-    <div className="p-6 rounded-2xl" style={{background:"#0f172a",border:"1px solid rgba(255,255,255,0.06)"}}>
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <div className="p-4 rounded-xl" style={{background:"#020617",border:"1px solid rgba(255,255,255,0.06)"}}><div className="text-xs font-semibold tracking-wider uppercase mb-1.5" style={{color:"#64748b"}}>Staked LP</div><div className="text-2xl font-bold text-white">{Number(s).toFixed(4)}</div></div>
-        <div className="p-4 rounded-xl" style={{background:"#020617",border:"1px solid rgba(255,255,255,0.06)"}}><div className="text-xs font-semibold tracking-wider uppercase mb-1.5" style={{color:"#64748b"}}>Rewards</div><div className="text-2xl font-bold" style={{color:"#22c55e"}}>{Number(e).toFixed(4)} USDC</div></div>
-      </div>
-      <button className="w-full py-3 rounded-full text-sm font-semibold mb-6" style={{background:"transparent",border:"1px solid rgba(34,197,94,0.3)",color:"#22c55e"}} disabled={!earned||(earned as bigint)===0n||ip} onClick={()=>wc({address:ADDRESSES.litvm.staking as `0x${string}`,abi:STAKING_ABI,functionName:"claimReward"})}>{ip?"Claiming...":"Claim Rewards"}</button>
-      <div className="flex gap-3 mb-3"><input className="flex-1 bg-[#020617] border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 text-white font-semibold outline-none text-sm" placeholder="LP amount" value={sv} onChange={e=>ss(e.target.value)}/><button className="px-6 py-3 rounded-full text-white font-semibold text-sm" style={{background:"#22c55e"}} disabled={!sv||ip} onClick={()=>wc({address:ADDRESSES.litvm.staking as `0x${string}`,abi:STAKING_ABI,functionName:"stake",args:[parseUnits(sv,18)]})}>Stake</button></div>
-      <div className="flex gap-3"><input className="flex-1 bg-[#020617] border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 text-white font-semibold outline-none text-sm" placeholder="LP amount" value={wv} onChange={e=>sw(e.target.value)}/><button className="px-6 py-3 rounded-full text-white font-semibold text-sm" style={{background:"#1e293b",border:"1px solid rgba(255,255,255,0.08)"}} disabled={!wv||ip} onClick={()=>wc({address:ADDRESSES.litvm.staking as `0x${string}`,abi:STAKING_ABI,functionName:"withdraw",args:[parseUnits(wv,18)]})}>Withdraw</button></div>
-      {tx&&<div className="mt-4 text-xs font-mono truncate" style={{color:"#64748b"}}>{tx}{w&&<span style={{color:"#f59e0b"}}> pending...</span>}</div>}
-    </div></div>;
+"use client";
+import { useState } from "react";
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseUnits, formatUnits } from "viem";
+import { STAKING_ABI, ADDRESSES } from "@/lib/constants";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+export default function Staking() {
+  const { address, isConnected } = useAccount();
+  const [stakeV, setStakeV] = useState("");
+  const [withdrawV, setWithdrawV] = useState("");
+  const { data: earned } = useReadContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "earned", args: address ? [address] : undefined, query: { enabled: !!address } });
+  const { data: staked } = useReadContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "stakes", args: address ? [address] : undefined, query: { enabled: !!address } });
+  const { writeContract, data: txHash, isPending } = useWriteContract();
+  const { isLoading: waiting } = useWaitForTransactionReceipt({ hash: txHash });
+
+  if (!isConnected) return <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3"><h2 className="text-xl font-bold">Connect Wallet</h2></div>;
+
+  const e = earned ? formatUnits(earned as bigint, 6) : "0";
+  const s = staked ? formatUnits(staked as bigint, 18) : "0";
+
+  return (
+    <div className="mt-10 max-w-[520px] mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Staking</h1>
+      <Card className="p-6">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
+            <div className="text-xs text-zinc-500 mb-1">APY</div><div className="text-xl font-bold text-green-400">~12%</div>
+          </div>
+          <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
+            <div className="text-xs text-zinc-500 mb-1">Staked</div><div className="text-xl font-bold">{Number(s).toFixed(2)}</div>
+          </div>
+          <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
+            <div className="text-xs text-zinc-500 mb-1">Earned</div><div className="text-xl font-bold text-green-400">{Number(e).toFixed(2)}</div>
+          </div>
+        </div>
+
+        {/* Claim */}
+        <Button variant="outline" className="w-full mb-6 border-green-500/30 text-green-400 hover:bg-green-500/10" disabled={!earned || (earned as bigint) === 0n || isPending}
+          onClick={() => writeContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "claimReward" })}>
+          {isPending ? "Claiming..." : "Claim Rewards"}
+        </Button>
+
+        {/* Stake */}
+        <div className="mb-4"><div className="text-xs text-zinc-500 mb-2">Stake LP Tokens</div></div>
+        <div className="flex gap-3 mb-4">
+          <Input placeholder="LP amount" value={stakeV} onChange={e => setStakeV(e.target.value)} />
+          <Button disabled={!stakeV || isPending} onClick={() => writeContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "stake", args: [parseUnits(stakeV, 18)] })}>Stake</Button>
+        </div>
+
+        {/* Withdraw */}
+        <div className="mb-4"><div className="text-xs text-zinc-500 mb-2">Withdraw LP Tokens</div></div>
+        <div className="flex gap-3">
+          <Input placeholder="LP amount" value={withdrawV} onChange={e => setWithdrawV(e.target.value)} />
+          <Button variant="secondary" disabled={!withdrawV || isPending} onClick={() => writeContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "withdraw", args: [parseUnits(withdrawV, 18)] })}>Withdraw</Button>
+        </div>
+
+        {txHash && <div className="mt-4 text-xs font-mono text-zinc-500 truncate">{txHash} {waiting && <span className="text-amber-400">(pending)</span>}</div>}
+      </Card>
+    </div>
+  );
 }

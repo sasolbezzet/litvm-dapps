@@ -1,5 +1,4 @@
 @import "tailwindcss";
-body{font-family:system-ui,-apple-system,sans-serif;background:#020617;color:#f8fafc;margin:0}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#1e293b;border-radius:3px}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.af{animation:fadeIn .4s ease forwards}
+body{font-family:system-ui,-apple-system,sans-serif;background:#020617;color:#fafafa;margin:0}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#27272a;border-radius:3px}
+::selection{background:rgba(34,197,94,0.2);color:white}
