@@ -1,0 +1,9 @@
+1:"$Sreact.fragment"
+2:I[28547,["/litvm-dapps/_next/static/chunks/07hcygcffpq7-.js","/litvm-dapps/_next/static/chunks/0yx2n2qs0dmni.js","/litvm-dapps/_next/static/chunks/06akk2ety.2_k.js","/litvm-dapps/_next/static/chunks/0oc7kbrzbxkra.js","/litvm-dapps/_next/static/chunks/0t6gxkzeipwfk.js","/litvm-dapps/_next/static/chunks/0l3l83j03i0k8.js"],"ClientPageRoot"]
+3:I[6828,["/litvm-dapps/_next/static/chunks/07hcygcffpq7-.js","/litvm-dapps/_next/static/chunks/0yx2n2qs0dmni.js","/litvm-dapps/_next/static/chunks/06akk2ety.2_k.js","/litvm-dapps/_next/static/chunks/0oc7kbrzbxkra.js","/litvm-dapps/_next/static/chunks/0t6gxkzeipwfk.js","/litvm-dapps/_next/static/chunks/0l3l83j03i0k8.js","/litvm-dapps/_next/static/chunks/091~q_.0roiy4.js"],"default"]
+6:I[78639,["/litvm-dapps/_next/static/chunks/07hcygcffpq7-.js","/litvm-dapps/_next/static/chunks/0yx2n2qs0dmni.js","/litvm-dapps/_next/static/chunks/06akk2ety.2_k.js","/litvm-dapps/_next/static/chunks/0oc7kbrzbxkra.js","/litvm-dapps/_next/static/chunks/0t6gxkzeipwfk.js","/litvm-dapps/_next/static/chunks/0l3l83j03i0k8.js"],"OutletBoundary"]
+7:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/litvm-dapps/_next/static/chunks/091~q_.0roiy4.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"gco-FdnZdCMyfiOLNfMAu"}
+4:{}
+5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
+8:null
