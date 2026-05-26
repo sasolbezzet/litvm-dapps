@@ -1,7 +1,7 @@
 "use client";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, getDefaultConfig, darkTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider, http } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { defineChain } from "viem";
@@ -10,7 +10,7 @@ import { LITVM_CHAIN_ID, LITVM_RPC, SEPOLIA_CHAIN_ID, SEPOLIA_RPC } from "@/lib/
 
 const litvm = defineChain({
   id: LITVM_CHAIN_ID,
-  name: "LitVM Testnet",
+  name: "LitVM",
   nativeCurrency: { name: "zkLTC", symbol: "zkLTC", decimals: 18 },
   rpcUrls: { default: { http: [LITVM_RPC] } },
 });
@@ -26,10 +26,7 @@ const config = getDefaultConfig({
   appName: "LitVM DeFi",
   projectId: "litvm-defi",
   chains: [litvm, sepolia],
-  transports: {
-    [litvm.id]: http(),
-    [sepolia.id]: http(),
-  },
+  transports: { [litvm.id]: http(), [sepolia.id]: http() },
 });
 
 const queryClient = new QueryClient();
@@ -37,12 +34,17 @@ const queryClient = new QueryClient();
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-950 text-white min-h-screen">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
+      </head>
+      <body className="min-h-screen" style={{ background: "var(--cb-dark)" }}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider>
+            <RainbowKitProvider
+              theme={darkTheme({ accentColor: "#0052ff", borderRadius: "large" })}
+            >
               <Navbar />
-              <main className="max-w-6xl mx-auto p-4">{children}</main>
+              <main className="max-w-5xl mx-auto px-4 pb-20">{children}</main>
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>

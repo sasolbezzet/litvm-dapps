@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits } from "viem";
-import { TOKEN_LIST, ERC20_ABI, ROUTER_ABI, ADDRESSES } from "@/lib/constants";
+import { TOKEN_LIST, ROUTER_ABI, ADDRESSES } from "@/lib/constants";
 
 export default function Liquidity() {
   const { address } = useAccount();
-  const [tokenA, setTokenA] = useState(TOKEN_LIST[0]);
-  const [tokenB, setTokenB] = useState(TOKEN_LIST[1]);
+  const [tokenAIdx, setTokenAIdx] = useState(0);
+  const [tokenBIdx, setTokenBIdx] = useState(1);
   const [amountA, setAmountA] = useState("");
   const [amountB, setAmountB] = useState("");
   const [mode, setMode] = useState<"add" | "remove">("add");
@@ -16,70 +16,85 @@ export default function Liquidity() {
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: waiting } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const handleAdd = async () => {
-    if (!amountA || !amountB || !address) return;
-    const amtA = parseUnits(amountA, tokenA.decimals);
-    const amtB = parseUnits(amountB, tokenB.decimals);
-    const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200);
-    writeContract({
-      address: ADDRESSES.litvm.router as `0x${string}`,
-      abi: ROUTER_ABI,
-      functionName: "addLiquidity",
-      args: [tokenA.address, tokenB.address, amtA, amtB, 0n, 0n, address, deadline],
-    });
-  };
+  if (!address)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <h2 className="text-2xl font-semibold">Connect your wallet</h2>
+        <p className="text-sm" style={{ color: "var(--cb-text-secondary)" }}>Connect to provide liquidity</p>
+      </div>
+    );
 
-  if (!address) return <p className="text-gray-400 mt-8 text-center">Connect wallet</p>;
+  const tokenA = TOKEN_LIST[tokenAIdx];
+  const tokenB = TOKEN_LIST[tokenBIdx];
 
   return (
-    <div className="mt-8 max-w-md mx-auto">
+    <div className="mt-10 max-w-[440px] mx-auto">
       <h1 className="text-2xl font-bold mb-6">Liquidity</h1>
-      <div className="flex gap-2 mb-4">
-        <button className={`px-4 py-2 rounded ${mode === "add" ? "bg-blue-600" : "bg-gray-800"}`} onClick={() => setMode("add")}>Add</button>
-        <button className={`px-4 py-2 rounded ${mode === "remove" ? "bg-blue-600" : "bg-gray-800"}`} onClick={() => setMode("remove")}>Remove</button>
-      </div>
-      <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 space-y-4">
+      <div className="card-defi">
+        {/* Tabs */}
+        <div className="flex bg-[var(--cb-surface)] rounded-full p-1 mb-6">
+          <button
+            className="flex-1 py-2.5 rounded-full text-sm font-semibold transition-all"
+            style={{ background: mode === "add" ? "var(--cb-blue)" : "transparent", color: mode === "add" ? "white" : "var(--cb-text-secondary)" }}
+            onClick={() => setMode("add")}
+          >
+            Add
+          </button>
+          <button
+            className="flex-1 py-2.5 rounded-full text-sm font-semibold transition-all"
+            style={{ background: mode === "remove" ? "var(--cb-blue)" : "transparent", color: mode === "remove" ? "white" : "var(--cb-text-secondary)" }}
+            onClick={() => setMode("remove")}
+          >
+            Remove
+          </button>
+        </div>
+
         {mode === "add" ? (
           <>
-            <TokenSelect token={tokenA} setToken={setTokenA} amount={amountA} setAmount={setAmountA} />
-            <TokenSelect token={tokenB} setToken={setTokenB} amount={amountB} setAmount={setAmountB} />
-            <div className="text-xs text-gray-500 break-all">
-              {txHash && <span>TX: {txHash} {waiting && "(pending...)"}</span>}
+            <div className="mb-4">
+              <span className="text-xs font-medium" style={{ color: "var(--cb-text-secondary)" }}>Token A</span>
+              <div className="flex gap-3 mt-1.5">
+                <input className="input-defi" placeholder="0" value={amountA} onChange={(e) => setAmountA(e.target.value)} />
+                <select className="select-defi" style={{ width: 140 }} value={tokenAIdx} onChange={(e) => setTokenAIdx(Number(e.target.value))}>
+                  {TOKEN_LIST.map((t, i) => <option key={t.symbol} value={i}>{t.symbol}</option>)}
+                </select>
+              </div>
             </div>
-            <button className="w-full bg-blue-600 hover:bg-blue-700 rounded-lg py-3 font-semibold disabled:opacity-50"
-              disabled={!amountA || !amountB || isPending || waiting} onClick={handleAdd}>
-              {isPending || waiting ? "Adding..." : "Add Liquidity"}
+            <div className="flex justify-center -my-2 relative z-10">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm" style={{ background: "var(--cb-surface)", border: "1px solid var(--cb-border)" }}>+</div>
+            </div>
+            <div className="mb-4">
+              <span className="text-xs font-medium" style={{ color: "var(--cb-text-secondary)" }}>Token B</span>
+              <div className="flex gap-3 mt-1.5">
+                <input className="input-defi" placeholder="0" value={amountB} onChange={(e) => setAmountB(e.target.value)} />
+                <select className="select-defi" style={{ width: 140 }} value={tokenBIdx} onChange={(e) => setTokenBIdx(Number(e.target.value))}>
+                  {TOKEN_LIST.map((t, i) => <option key={t.symbol} value={i}>{t.symbol}</option>)}
+                </select>
+              </div>
+            </div>
+            {txHash && <div className="text-xs truncate mb-3" style={{ color: "var(--cb-text-secondary)" }}>TX: {txHash} {waiting && "(pending...)"}</div>}
+            <button
+              className="btn-pill btn-primary w-full h-[54px]"
+              disabled={!amountA || !amountB || isPending || waiting}
+              onClick={() => {
+                writeContract({
+                  address: ADDRESSES.litvm.router as `0x${string}`,
+                  abi: ROUTER_ABI,
+                  functionName: "addLiquidity",
+                  args: [tokenA.address, tokenB.address, parseUnits(amountA, tokenA.decimals), parseUnits(amountB, tokenB.decimals), 0n, 0n, address, BigInt(Math.floor(Date.now() / 1000) + 1200)],
+                });
+              }}
+            >
+              {isPending || waiting ? "Adding Liquidity..." : "Add Liquidity"}
             </button>
           </>
         ) : (
-          <RemoveLiquidity />
+          <div className="text-center py-12" style={{ color: "var(--cb-text-secondary)" }}>
+            <div className="text-3xl mb-3">🛠</div>
+            <p className="text-sm">Remove liquidity via contract interaction</p>
+          </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function TokenSelect({ token, setToken, amount, setAmount }: { token: typeof TOKEN_LIST[0]; setToken: (t: typeof TOKEN_LIST[0]) => void; amount: string; setAmount: (v: string) => void }) {
-  return (
-    <div>
-      <select className="w-full bg-gray-800 rounded p-2" value={token.symbol} onChange={(e) => setToken(TOKEN_LIST.find(t => t.symbol === e.target.value) || TOKEN_LIST[0])}>
-        {TOKEN_LIST.map(t => <option key={t.symbol}>{t.symbol}</option>)}
-      </select>
-      <input className="w-full bg-gray-800 rounded p-2 mt-2" placeholder="0.0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-    </div>
-  );
-}
-
-function RemoveLiquidity() {
-  const { address } = useAccount();
-  const [lpAmount, setLpAmount] = useState("");
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-gray-400">Enter LP token amount to remove</p>
-      <input className="w-full bg-gray-800 rounded p-2" placeholder="LP amount" value={lpAmount} onChange={(e) => setLpAmount(e.target.value)} />
-      <button className="w-full bg-blue-600 hover:bg-blue-700 rounded-lg py-3 font-semibold disabled:opacity-50" disabled={!lpAmount}>
-        Remove Liquidity
-      </button>
     </div>
   );
 }

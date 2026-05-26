@@ -8,16 +8,24 @@ import { TOKEN_LIST, BRIDGE_LITVM_ABI, BRIDGE_SEPOLIA_ABI, ADDRESSES } from "@/l
 export default function Bridge() {
   const { address } = useAccount();
   const [direction, setDirection] = useState<"litvm-to-sepolia" | "sepolia-to-litvm">("litvm-to-sepolia");
-  const [token, setToken] = useState(TOKEN_LIST[0]);
+  const [tokenIdx, setTokenIdx] = useState(0);
   const [amount, setAmount] = useState("");
 
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: waiting } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const handleBridge = () => {
-    if (!amount || !address) return;
-    const amt = parseUnits(amount, token.decimals);
+  if (!address)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <h2 className="text-2xl font-semibold">Connect your wallet</h2>
+      </div>
+    );
 
+  const token = TOKEN_LIST[tokenIdx];
+
+  const handleBridge = () => {
+    if (!amount) return;
+    const amt = parseUnits(amount, token.decimals);
     if (direction === "litvm-to-sepolia") {
       writeContract({
         address: ADDRESSES.litvm.bridgeLitVM as `0x${string}`,
@@ -35,38 +43,51 @@ export default function Bridge() {
     }
   };
 
-  if (!address) return <p className="text-gray-400 mt-8 text-center">Connect wallet</p>;
-
   return (
-    <div className="mt-8 max-w-md mx-auto">
+    <div className="mt-10 max-w-[440px] mx-auto">
       <h1 className="text-2xl font-bold mb-6">Bridge</h1>
-      <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 space-y-4">
-        <div className="flex gap-2 mb-4">
-          <button className={`px-4 py-2 rounded text-sm ${direction === "litvm-to-sepolia" ? "bg-blue-600" : "bg-gray-800"}`}
-            onClick={() => setDirection("litvm-to-sepolia")}>
+      <div className="card-defi">
+        {/* Direction */}
+        <div className="flex bg-[var(--cb-surface)] rounded-full p-1 mb-6">
+          <button
+            className="flex-1 py-2.5 rounded-full text-xs font-semibold transition-all"
+            style={{ background: direction === "litvm-to-sepolia" ? "var(--cb-blue)" : "transparent", color: direction === "litvm-to-sepolia" ? "white" : "var(--cb-text-secondary)" }}
+            onClick={() => setDirection("litvm-to-sepolia")}
+          >
             LitVM → Sepolia
           </button>
-          <button className={`px-4 py-2 rounded text-sm ${direction === "sepolia-to-litvm" ? "bg-blue-600" : "bg-gray-800"}`}
-            onClick={() => setDirection("sepolia-to-litvm")}>
+          <button
+            className="flex-1 py-2.5 rounded-full text-xs font-semibold transition-all"
+            style={{ background: direction === "sepolia-to-litvm" ? "var(--cb-blue)" : "transparent", color: direction === "sepolia-to-litvm" ? "white" : "var(--cb-text-secondary)" }}
+            onClick={() => setDirection("sepolia-to-litvm")}
+          >
             Sepolia → LitVM
           </button>
         </div>
-        <div>
-          <label className="text-sm text-gray-400">Token</label>
-          <select className="w-full bg-gray-800 rounded p-2 mt-1" value={token.symbol} onChange={(e) => setToken(TOKEN_LIST.find(t => t.symbol === e.target.value) || TOKEN_LIST[0])}>
-            {TOKEN_LIST.map(t => <option key={t.symbol}>{t.symbol}</option>)}
+
+        {/* From/To indicator */}
+        <div className="flex items-center justify-center gap-3 mb-5 text-sm font-medium">
+          <span className="token-pill">{direction === "litvm-to-sepolia" ? "LitVM" : "Sepolia"}</span>
+          <span style={{ color: "var(--cb-text-secondary)" }}>→</span>
+          <span className="token-pill">{direction === "litvm-to-sepolia" ? "Sepolia" : "LitVM"}</span>
+        </div>
+
+        <div className="mb-4">
+          <span className="text-xs font-medium" style={{ color: "var(--cb-text-secondary)" }}>Token</span>
+          <select className="select-defi mt-1.5" style={{ height: 56 }} value={tokenIdx} onChange={(e) => setTokenIdx(Number(e.target.value))}>
+            {TOKEN_LIST.map((t, i) => <option key={t.symbol} value={i}>{t.symbol}</option>)}
           </select>
         </div>
-        <div>
-          <label className="text-sm text-gray-400">Amount</label>
-          <input className="w-full bg-gray-800 rounded p-2 mt-1" placeholder="0.0" value={amount} onChange={(e) => setAmount(e.target.value)} />
+
+        <div className="mb-4">
+          <span className="text-xs font-medium" style={{ color: "var(--cb-text-secondary)" }}>Amount</span>
+          <input className="input-defi mt-1.5" style={{ fontSize: 22, height: 56 }} placeholder="0.0" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
-        <div className="text-xs text-gray-500 break-all">
-          {txHash && <span>TX: {txHash} {waiting && "(pending...)"}</span>}
-        </div>
-        <button className="w-full bg-blue-600 hover:bg-blue-700 rounded-lg py-3 font-semibold disabled:opacity-50"
-          disabled={!amount || isPending || waiting} onClick={handleBridge}>
-          {isPending || waiting ? "Bridging..." : `Bridge ${direction === "litvm-to-sepolia" ? "LitVM → Sepolia" : "Sepolia → LitVM"}`}
+
+        {txHash && <div className="text-xs truncate mb-3" style={{ color: "var(--cb-text-secondary)" }}>TX: {txHash} {waiting && "(pending...)"}</div>}
+
+        <button className="btn-pill btn-primary w-full h-[54px]" disabled={!amount || isPending || waiting} onClick={handleBridge}>
+          {isPending || waiting ? "Bridging..." : `Bridge to ${direction === "litvm-to-sepolia" ? "Sepolia" : "LitVM"}`}
         </button>
       </div>
     </div>
