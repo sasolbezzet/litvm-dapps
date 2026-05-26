@@ -1,65 +1,49 @@
 "use client";
 import { useState } from "react";
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits, formatUnits } from "viem";
-import { STAKING_ABI, ADDRESSES } from "@/lib/constants";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
+import { useStaking } from "@/hooks/useStaking";
+import { fmtUnits } from "@/lib/utils";
 
-export default function Staking() {
+export default function StakingPage() {
   const { address, isConnected } = useAccount();
-  const [stakeV, setStakeV] = useState("");
-  const [withdrawV, setWithdrawV] = useState("");
-  const { data: earned } = useReadContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "earned", args: address ? [address] : undefined, query: { enabled: !!address } });
-  const { data: staked } = useReadContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "stakes", args: address ? [address] : undefined, query: { enabled: !!address } });
-  const { writeContract, data: txHash, isPending } = useWriteContract();
-  const { isLoading: waiting } = useWaitForTransactionReceipt({ hash: txHash });
+  const [sv, ss] = useState(""); const [wv, sw] = useState("");
+  const { earned, staked, totalStaked, rewardRate, stake, unstake, claim, txHash, isPending } = useStaking(address);
 
-  if (!isConnected) return <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3"><h2 className="text-xl font-bold">Connect Wallet</h2></div>;
-
-  const e = earned ? formatUnits(earned as bigint, 6) : "0";
-  const s = staked ? formatUnits(staked as bigint, 18) : "0";
+  if (!isConnected) return <C />;
 
   return (
     <div className="mt-10 max-w-[520px] mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Staking</h1>
-      <Card className="p-6">
-        {/* Stats */}
+      <h1 className="text-2xl font-bold text-white mb-6">Staking</h1>
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-            <div className="text-xs text-zinc-500 mb-1">APY</div><div className="text-xl font-bold text-green-400">~12%</div>
-          </div>
-          <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-            <div className="text-xs text-zinc-500 mb-1">Staked</div><div className="text-xl font-bold">{Number(s).toFixed(2)}</div>
-          </div>
-          <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-            <div className="text-xs text-zinc-500 mb-1">Earned</div><div className="text-xl font-bold text-green-400">{Number(e).toFixed(2)}</div>
-          </div>
+          <S label="APY" v="~12%" g />
+          <S label="Your Stake" v={fmtUnits(staked, 18)} />
+          <S label="Earned" v={`${fmtUnits(earned, 6)} USDC`} g />
         </div>
 
-        {/* Claim */}
-        <Button variant="outline" className="w-full mb-6 border-green-500/30 text-green-400 hover:bg-green-500/10" disabled={!earned || (earned as bigint) === 0n || isPending}
-          onClick={() => writeContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "claimReward" })}>
+        <button onClick={claim} disabled={!earned || earned === 0n || isPending} className="w-full h-11 rounded-xl border border-green-500/30 text-green-400 font-semibold text-sm hover:bg-green-500/10 disabled:opacity-40 mb-6">
           {isPending ? "Claiming..." : "Claim Rewards"}
-        </Button>
+        </button>
 
-        {/* Stake */}
-        <div className="mb-4"><div className="text-xs text-zinc-500 mb-2">Stake LP Tokens</div></div>
+        <div className="text-xs text-zinc-500 mb-2">Stake LP Tokens</div>
         <div className="flex gap-3 mb-4">
-          <Input placeholder="LP amount" value={stakeV} onChange={e => setStakeV(e.target.value)} />
-          <Button disabled={!stakeV || isPending} onClick={() => writeContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "stake", args: [parseUnits(stakeV, 18)] })}>Stake</Button>
+          <input className="flex-1 h-12 bg-zinc-800/30 rounded-xl px-4 text-white font-semibold outline-none" placeholder="Amount" value={sv} onChange={e => ss(e.target.value)} />
+          <button onClick={() => stake(sv)} disabled={!sv || isPending} className="px-6 h-12 rounded-xl bg-green-500 text-black font-semibold text-sm hover:bg-green-600 disabled:opacity-40">Stake</button>
         </div>
 
-        {/* Withdraw */}
-        <div className="mb-4"><div className="text-xs text-zinc-500 mb-2">Withdraw LP Tokens</div></div>
+        <div className="text-xs text-zinc-500 mb-2">Withdraw LP Tokens</div>
         <div className="flex gap-3">
-          <Input placeholder="LP amount" value={withdrawV} onChange={e => setWithdrawV(e.target.value)} />
-          <Button variant="secondary" disabled={!withdrawV || isPending} onClick={() => writeContract({ address: ADDRESSES.litvm.staking as `0x${string}`, abi: STAKING_ABI, functionName: "withdraw", args: [parseUnits(withdrawV, 18)] })}>Withdraw</Button>
+          <input className="flex-1 h-12 bg-zinc-800/30 rounded-xl px-4 text-white font-semibold outline-none" placeholder="Amount" value={wv} onChange={e => sw(e.target.value)} />
+          <button onClick={() => unstake(wv)} disabled={!wv || isPending} className="px-6 h-12 rounded-xl bg-zinc-800 border border-zinc-700 text-white font-semibold text-sm hover:bg-zinc-700 disabled:opacity-40">Withdraw</button>
         </div>
 
-        {txHash && <div className="mt-4 text-xs font-mono text-zinc-500 truncate">{txHash} {waiting && <span className="text-amber-400">(pending)</span>}</div>}
-      </Card>
+        {txHash && <div className="mt-4 text-xs font-mono text-zinc-500 truncate">{txHash} {isPending && <span className="text-amber-400">pending...</span>}</div>}
+      </div>
     </div>
   );
 }
+function S({ label, v, g }: { label: string; v: string; g?: boolean }) {
+  return <div className="bg-zinc-800/50 rounded-xl p-4 text-center"><div className="text-xs text-zinc-500 mb-1">{label}</div><div className={`text-xl font-bold ${g ? "text-green-400" : "text-white"}`}>{v}</div></div>;
+}
+function C() { return <div className="flex items-center justify-center min-h-[60vh]"><h2 className="text-xl font-bold text-white">Connect Wallet</h2></div>; }
