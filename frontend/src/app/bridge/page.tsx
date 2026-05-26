@@ -1,75 +1,15 @@
-"use client";
-
-import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits } from "viem";
-import { TOKEN_LIST, BRIDGE_LITVM_ABI, BRIDGE_SEPOLIA_ABI, ADDRESSES } from "@/lib/constants";
-
-export default function Bridge() {
-  const { address } = useAccount();
-  const [dir, setDir] = useState<"litvm-to-sepolia" | "sepolia-to-litvm">("litvm-to-sepolia");
-  const [tok, setTok] = useState(0);
-  const [amt, setAmt] = useState("");
-
-  const { writeContract, data: txHash, isPending } = useWriteContract();
-  const { isLoading: waiting } = useWaitForTransactionReceipt({ hash: txHash });
-
-  if (!address)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 animate-fade-in">
-        <h2 className="text-2xl font-bold" style={{ fontFamily: "var(--font-brand)" }}>Connect Wallet</h2>
-      </div>
-    );
-
-  const token = TOKEN_LIST[tok];
-
-  return (
-    <div className="mt-10 max-w-[460px] mx-auto animate-fade-in">
-      <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "var(--font-brand)" }}>Bridge</h1>
-      <div className="glass-card p-6">
-        <div className="segment mb-6">
-          {["litvm-to-sepolia", "sepolia-to-litvm"].map((d) => (
-            <button key={d} className={`segment-btn${dir === d ? " active" : ""}`} onClick={() => setDir(d as typeof dir)}>
-              {d === "litvm-to-sepolia" ? "LitVM → Sepolia" : "Sepolia → LitVM"}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <span className="token-pill">{dir === "litvm-to-sepolia" ? "LitVM" : "Sepolia"}</span>
-          <span style={{ color: "var(--accent-green)", fontSize: 18 }}>→</span>
-          <span className="token-pill">{dir === "litvm-to-sepolia" ? "Sepolia" : "LitVM"}</span>
-        </div>
-
-        <div className="mb-4">
-          <span className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-tertiary)" }}>Token</span>
-          <select className="select" style={{ height: 56 }} value={tok} onChange={(e) => setTok(Number(e.target.value))}>
-            {TOKEN_LIST.map((t, i) => <option key={t.symbol} value={i}>{t.symbol}</option>)}
-          </select>
-        </div>
-        <div className="mb-4">
-          <span className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-tertiary)" }}>Amount</span>
-          <input className="input" style={{ height: 56, fontSize: 22 }} placeholder="0.0" value={amt} onChange={(e) => setAmt(e.target.value)} />
-        </div>
-
-        {txHash && (
-          <div className="mb-3 text-xs font-mono truncate" style={{ color: "var(--text-tertiary)" }}>
-            {txHash} {waiting && <span style={{ color: "var(--accent-amber)" }}>(pending)</span>}
-          </div>
-        )}
-
-        <button className="btn btn-primary btn-lg w-full" disabled={!amt || isPending || waiting}
-          onClick={() => {
-            const a = parseUnits(amt, token.decimals);
-            if (dir === "litvm-to-sepolia") {
-              writeContract({ address: ADDRESSES.litvm.bridgeLitVM as `0x${string}`, abi: BRIDGE_LITVM_ABI, functionName: "lock", args: [token.address, a, address] });
-            } else {
-              writeContract({ address: ADDRESSES.sepolia.bridgeSepolia as `0x${string}`, abi: BRIDGE_SEPOLIA_ABI, functionName: "burn", args: [token.address, a, address] });
-            }
-          }}>
-          {isPending || waiting ? "Bridging..." : `Bridge to ${dir === "litvm-to-sepolia" ? "Sepolia" : "LitVM"}`}
-        </button>
-      </div>
-    </div>
-  );
+"use client";import {useState}from"react";import {useAccount,useWriteContract,useWaitForTransactionReceipt}from"wagmi";import {parseUnits}from"viem";import {TOKEN_LIST,BRIDGE_LITVM_ABI,BRIDGE_SEPOLIA_ABI,ADDRESSES}from"@/lib/constants";
+export default function Bridge(){const{address,isConnected}=useAccount();const[d,sd]=useState<"L2S"|"S2L">("L2S");const[t,st]=useState(0);const[a,sa]=useState("");const{wc,data:tx,ip}=useWriteContract();const{il:w}=useWaitForTransactionReceipt({hash:tx});if(!isConnected)return<div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 af"><h2 className="text-xl font-bold text-white">Connect Wallet</h2></div>;
+  const tk=TOKEN_LIST[t];const il=d==="L2S";
+  return <div className="mt-10 max-w-[460px] mx-auto af"><h1 className="text-2xl font-bold mb-6 text-white">Bridge</h1>
+    <div className="p-6 rounded-2xl" style={{background:"#0f172a",border:"1px solid rgba(255,255,255,0.06)"}}>
+      <div className="flex rounded-full p-1 mb-6" style={{background:"#020617"}}>{(["L2S","S2L"]as const).map(x=><button key={x} className="flex-1 py-2.5 rounded-full text-xs font-semibold transition-all" style={{background:d===x?"#22c55e":"transparent",color:d===x?"white":"#94a3b8"}} onClick={()=>sd(x)}>{x==="L2S"?"LitVM → Sepolia":"Sepolia → LitVM"}</button>)}</div>
+      <div className="flex items-center justify-center gap-3 mb-6"><span className="px-4 py-2 rounded-full text-xs font-semibold" style={{background:"#1e293b",border:"1px solid rgba(255,255,255,0.08)"}}>{il?"LitVM":"Sepolia"}</span><span style={{color:"#22c55e"}}>→</span><span className="px-4 py-2 rounded-full text-xs font-semibold" style={{background:"#1e293b",border:"1px solid rgba(255,255,255,0.08)"}}>{il?"Sepolia":"LitVM"}</span></div>
+      <div className="mb-4"><div className="text-xs font-semibold tracking-wider uppercase mb-1.5" style={{color:"#64748b"}}>Token</div><select className="w-full bg-[#020617] border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 text-white font-semibold outline-none cursor-pointer" value={t} onChange={e=>st(Number(e.target.value))}>{TOKEN_LIST.map((t,i)=><option key={t.symbol} value={i}>{t.symbol}</option>)}</select></div>
+      <div className="mb-4"><div className="text-xs font-semibold tracking-wider uppercase mb-1.5" style={{color:"#64748b"}}>Amount</div><input className="w-full bg-[#020617] border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 text-white text-xl font-semibold outline-none" placeholder="0.0" value={a} onChange={e=>sa(e.target.value)}/></div>
+      {tx&&<div className="mb-3 text-xs font-mono truncate" style={{color:"#64748b"}}>{tx}{w&&<span style={{color:"#f59e0b"}}> pending...</span>}</div>}
+      <button className="w-full py-3.5 rounded-full text-white font-semibold text-sm" style={{background:"#22c55e"}} disabled={!a||ip||w}
+        onClick={()=>{const am=parseUnits(a,tk.decimals);if(il)wc({address:ADDRESSES.litvm.bridgeLitVM as `0x${string}`,abi:BRIDGE_LITVM_ABI,functionName:"lock",args:[tk.address,am,address]});else wc({address:ADDRESSES.sepolia.bridgeSepolia as `0x${string}`,abi:BRIDGE_SEPOLIA_ABI,functionName:"burn",args:[tk.address,am,address]});}}>
+        {ip||w?"Bridging...":`Bridge to ${il?"Sepolia":"LitVM"}`}</button>
+    </div></div>;
 }

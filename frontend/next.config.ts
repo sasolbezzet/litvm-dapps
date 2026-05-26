@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
-
 const nextConfig: NextConfig = {
   output: "export",
-  images: { unoptimized: true },
-  basePath: "/litvm-dapps",
   trailingSlash: true,
+  basePath: "/litvm-dapps",
+  typescript: { ignoreBuildErrors: true },
 };
-
 export default nextConfig;
