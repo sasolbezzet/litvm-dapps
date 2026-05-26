@@ -16,36 +16,37 @@ export default function Navbar() {
   const pathname = usePathname();
   return (
     <nav
-      className="sticky top-0 z-50 border-b backdrop-blur-xl"
+      className="sticky top-0 z-50 border-b"
       style={{
-        background: "rgba(10, 11, 13, 0.85)",
-        borderColor: "var(--cb-border)",
+        background: "rgba(2, 6, 23, 0.88)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderColor: "var(--border-default)",
       }}
     >
-      <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-3 group no-underline">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-colors"
-              style={{ background: "var(--cb-blue)", color: "white" }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm transition-shadow"
+              style={{
+                background: "linear-gradient(135deg, var(--accent-green), var(--accent-green-soft))",
+                fontFamily: "var(--font-brand)",
+                color: "white",
+                boxShadow: "0 2px 12px var(--accent-green-glow)",
+              }}
             >
               L
             </div>
-            <span className="text-lg font-semibold tracking-tight">LitVM DeFi</span>
+            <span className="text-lg font-semibold tracking-wide" style={{ fontFamily: "var(--font-brand)", letterSpacing: "0.05em" }}>
+              LITVM
+            </span>
           </Link>
           <div className="hidden md:flex items-center gap-1">
             {LINKS.map((l) => {
               const active = pathname === l.href || (l.href === "/" && pathname === "/");
               return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="px-3.5 py-2 rounded-full text-sm font-medium transition-all"
-                  style={{
-                    color: active ? "white" : "var(--cb-text-secondary)",
-                    background: active ? "var(--cb-surface)" : "transparent",
-                  }}
-                >
+                <Link key={l.href} href={l.href} className={`nav-link${active ? " active" : ""}`}>
                   {l.label}
                 </Link>
               );
